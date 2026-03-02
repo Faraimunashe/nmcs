@@ -26,9 +26,6 @@
           </div>
         </div>
 
-        <span class="hidden sm:inline-flex text-xs text-slate-500">
-          Mobile-first • Green & White
-        </span>
       </div>
     </header>
 

@@ -11,7 +11,7 @@ class ConferenceFeeSeeder extends Seeder
     {
         ConferenceFee::create([
             'name' => 'Easter Conference 2026',
-            'description' => 'Registration fee for NMCS Zimbabwe Easter Conference',
+            'description' => 'Registration fee for NMCS Zimbabwe Easter Conference 2026',
             'amount' => 25.00,
             'is_active' => true,
         ]);

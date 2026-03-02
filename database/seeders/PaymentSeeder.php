@@ -17,12 +17,7 @@ class PaymentSeeder extends Seeder
 
         $ecocashCharge = PaymentCharge::create([
             'narration' => 'EcoCash transaction fee',
-            'amount' => 2.50,
-        ]);
-
-        $bankCharge = PaymentCharge::create([
-            'narration' => 'Bank transfer fee',
-            'amount' => 5.00,
+            'amount' => 1,
         ]);
 
         PaymentMethod::create([
@@ -39,18 +34,5 @@ class PaymentSeeder extends Seeder
             'is_active' => true,
         ]);
 
-        PaymentMethod::create([
-            'payment_charge_id' => $bankCharge->id,
-            'name' => 'Bank Transfer',
-            'requires_reference' => true,
-            'is_active' => true,
-        ]);
-
-        PaymentMethod::create([
-            'payment_charge_id' => $ecocashCharge->id,
-            'name' => 'Paynow',
-            'requires_reference' => true,
-            'is_active' => true,
-        ]);
     }
 }

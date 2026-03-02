@@ -13,7 +13,10 @@ return new class extends Migration
             $table->foreignId('student_id')->constrained('students')->cascadeOnDelete();
             $table->foreignId('chronic_condition_id')->constrained('chronic_conditions')->cascadeOnDelete();
             $table->timestamps();
-            $table->unique(['student_id', 'chronic_condition_id']);
+            $table->unique(
+                ['student_id', 'chronic_condition_id'],
+                'stud_chronic_unique'
+            );
         });
     }
 

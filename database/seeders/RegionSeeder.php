@@ -14,7 +14,7 @@ class RegionSeeder extends Seeder
         $bulawayo = Region::create(['name' => 'Bulawayo']);
         $masvingo = Region::create(['name' => 'Masvingo']);
         $mutare = Region::create(['name' => 'Mutare']);
-        $gweru = Region::create(['name' => 'Gweru']);
+        $gweru = Region::create(['name' => 'Midlands']);
 
         Institution::create([
             'region_id' => $harare->id,
@@ -23,7 +23,7 @@ class RegionSeeder extends Seeder
         ]);
 
         Institution::create([
-            'region_id' => $harare->id,
+            'region_id' => $gweru->id,
             'code' => 'MSU',
             'name' => 'Midlands State University',
         ]);
@@ -36,8 +36,8 @@ class RegionSeeder extends Seeder
 
         Institution::create([
             'region_id' => $masvingo->id,
-            'code' => 'MU',
-            'name' => 'Masvingo University',
+            'code' => 'GZU',
+            'name' => 'Great Zimbabwe University',
         ]);
 
         Institution::create([
