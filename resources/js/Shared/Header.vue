@@ -55,6 +55,134 @@
                   <i class="fa-solid fa-money-bill-wave"></i>
                   <span class="hidden lg:inline">Payments</span>
                 </Link>
+                <Link
+                  href="/admin/users"
+                  :class="[
+                    'inline-flex items-center gap-2 rounded-2xl px-3 py-2 text-sm font-semibold transition',
+                    $page.url.startsWith('/admin/users') 
+                      ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200' 
+                      : 'text-slate-700 hover:bg-slate-50 ring-1 ring-slate-200 hover:ring-emerald-200'
+                  ]"
+                >
+                  <i class="fa-solid fa-user-shield"></i>
+                  <span class="hidden lg:inline">Users</span>
+                </Link>
+
+                <div class="relative" ref="settingsMenuRef">
+                  <button
+                    type="button"
+                    @click.stop="toggleSettingsMenu"
+                    :class="[
+                      'inline-flex items-center gap-2 rounded-2xl px-3 py-2 text-sm font-semibold transition',
+                      $page.url.startsWith('/admin/settings')
+                        ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200'
+                        : 'text-slate-700 hover:bg-slate-50 ring-1 ring-slate-200 hover:ring-emerald-200'
+                    ]"
+                  >
+                    <i class="fa-solid fa-gear"></i>
+                    <span class="hidden lg:inline">Settings</span>
+                    <i class="fa-solid fa-chevron-down text-[11px]" :class="{ 'rotate-180': showSettingsMenu }"></i>
+                  </button>
+                  <Transition
+                    enter-active-class="transition ease-out duration-100"
+                    enter-from-class="transform opacity-0 scale-95"
+                    enter-to-class="transform opacity-100 scale-100"
+                    leave-active-class="transition ease-in duration-75"
+                    leave-from-class="transform opacity-100 scale-100"
+                    leave-to-class="transform opacity-0 scale-95"
+                  >
+                    <div
+                      v-if="showSettingsMenu"
+                      class="absolute right-0 mt-2 w-64 rounded-2xl bg-white ring-1 ring-slate-200 shadow-lg py-2 z-40"
+                    >
+                      <div class="px-4 py-2 border-b border-slate-100">
+                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Settings</p>
+                      </div>
+                      <div class="py-1 text-sm">
+                        <Link
+                          href="/admin/settings/conference-fees"
+                          class="flex items-center gap-3 px-4 py-2 text-slate-700 hover:bg-slate-50"
+                          @click="closeSettingsMenu"
+                        >
+                          <i class="fa-solid fa-receipt w-4"></i>
+                          Conference Fees
+                        </Link>
+                        <Link
+                          href="/admin/settings/payment-charges"
+                          class="flex items-center gap-3 px-4 py-2 text-slate-700 hover:bg-slate-50"
+                          @click="closeSettingsMenu"
+                        >
+                          <i class="fa-solid fa-percent w-4"></i>
+                          Payment Charges
+                        </Link>
+                        <Link
+                          href="/admin/settings/payment-methods"
+                          class="flex items-center gap-3 px-4 py-2 text-slate-700 hover:bg-slate-50"
+                          @click="closeSettingsMenu"
+                        >
+                          <i class="fa-solid fa-money-bill-wave w-4"></i>
+                          Payment Methods
+                        </Link>
+                        <Link
+                          href="/admin/settings/payment-recipients"
+                          class="flex items-center gap-3 px-4 py-2 text-slate-700 hover:bg-slate-50"
+                          @click="closeSettingsMenu"
+                        >
+                          <i class="fa-solid fa-user-tag w-4"></i>
+                          Payment Recipients
+                        </Link>
+                        <Link
+                          href="/admin/settings/memberships"
+                          class="flex items-center gap-3 px-4 py-2 text-slate-700 hover:bg-slate-50"
+                          @click="closeSettingsMenu"
+                        >
+                          <i class="fa-solid fa-id-card w-4"></i>
+                          Memberships
+                        </Link>
+                        <Link
+                          href="/admin/settings/regions"
+                          class="flex items-center gap-3 px-4 py-2 text-slate-700 hover:bg-slate-50"
+                          @click="closeSettingsMenu"
+                        >
+                          <i class="fa-solid fa-map w-4"></i>
+                          Regions
+                        </Link>
+                        <Link
+                          href="/admin/settings/institutions"
+                          class="flex items-center gap-3 px-4 py-2 text-slate-700 hover:bg-slate-50"
+                          @click="closeSettingsMenu"
+                        >
+                          <i class="fa-solid fa-building-columns w-4"></i>
+                          Institutions
+                        </Link>
+                        <Link
+                          href="/admin/settings/disabilities"
+                          class="flex items-center gap-3 px-4 py-2 text-slate-700 hover:bg-slate-50"
+                          @click="closeSettingsMenu"
+                        >
+                          <i class="fa-solid fa-wheelchair w-4"></i>
+                          Disabilities
+                        </Link>
+                        <Link
+                          href="/admin/settings/dietaries"
+                          class="flex items-center gap-3 px-4 py-2 text-slate-700 hover:bg-slate-50"
+                          @click="closeSettingsMenu"
+                        >
+                          <i class="fa-solid fa-utensils w-4"></i>
+                          Dietary Options
+                        </Link>
+                        <Link
+                          href="/admin/settings/chronic-conditions"
+                          class="flex items-center gap-3 px-4 py-2 text-slate-700 hover:bg-slate-50"
+                          @click="closeSettingsMenu"
+                        >
+                          <i class="fa-solid fa-heart-pulse w-4"></i>
+                          Chronic Conditions
+                        </Link>
+                      </div>
+                    </div>
+                  </Transition>
+                </div>
               </template>
               <template v-else>
                 <Link
@@ -154,6 +282,22 @@
                       <i class="fa-solid fa-money-bill-wave w-4"></i>
                       All Payments
                     </Link>
+                    <Link
+                      href="/admin/users"
+                      class="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition"
+                      @click="closeUserMenu"
+                    >
+                      <i class="fa-solid fa-user-shield w-4"></i>
+                      Users
+                    </Link>
+                    <Link
+                      href="/admin/settings"
+                      class="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition"
+                      @click="closeUserMenu"
+                    >
+                      <i class="fa-solid fa-gear w-4"></i>
+                      Settings
+                    </Link>
                   </template>
                   <template v-else>
                     <Link
@@ -209,6 +353,8 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 const page = usePage();
 const showUserMenu = ref(false);
 const userMenuRef = ref(null);
+const showSettingsMenu = ref(false);
+const settingsMenuRef = ref(null);
 
 const user = computed(() => page.props.auth?.user || page.props.user);
 
@@ -225,6 +371,14 @@ const closeUserMenu = () => {
   showUserMenu.value = false;
 };
 
+const toggleSettingsMenu = () => {
+  showSettingsMenu.value = !showSettingsMenu.value;
+};
+
+const closeSettingsMenu = () => {
+  showSettingsMenu.value = false;
+};
+
 const logout = () => {
   router.post('/logout');
 };
@@ -232,6 +386,9 @@ const logout = () => {
 const handleClickOutside = (event) => {
   if (userMenuRef.value && !userMenuRef.value.contains(event.target)) {
     closeUserMenu();
+  }
+  if (settingsMenuRef.value && !settingsMenuRef.value.contains(event.target)) {
+    closeSettingsMenu();
   }
 };
 

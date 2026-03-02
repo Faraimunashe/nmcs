@@ -1,6 +1,6 @@
 <template>
   <Head title="Dashboard" />
-  
+
   <section class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
     <div>
       <h1 class="text-xl sm:text-2xl font-semibold tracking-tight">
@@ -28,16 +28,24 @@
             <span class="text-sm text-slate-600">Phone:</span>
             <span class="text-sm font-semibold text-slate-900">{{ student.phones[0] }}</span>
           </div>
-          <div v-if="student?.institution" class="flex items-center justify-between">
+          <div v-if="student?.institution" class="flex items-center justify-between gap-3">
             <span class="text-sm text-slate-600">Institution:</span>
-            <span class="text-sm font-semibold text-slate-900">{{ student.institution.name }}</span>
+            <div class="flex items-center gap-2">
+              <span class="text-sm font-semibold text-slate-900">{{ student.institution.name }}</span>
+              <img
+                v-if="student.institution.logo"
+                :src="`/storage/${student.institution.logo}`"
+                alt="Institution Logo"
+                class="h-7 w-7 rounded-full bg-white ring-1 ring-slate-200 object-contain"
+              />
+            </div>
           </div>
           <div v-if="student?.membership" class="flex items-center justify-between">
             <span class="text-sm text-slate-600">Membership:</span>
             <span class="text-sm font-semibold text-slate-900">{{ student.membership.status }}</span>
           </div>
         </div>
-        <div class="pt-3 border-t border-slate-200">
+        <div class="pt-3 border-t border-slate-200 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <Link
             :href="`/attendants/${student?.id}`"
             class="inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 hover:text-emerald-800"
@@ -45,6 +53,13 @@
             <i class="fa-solid fa-user-circle"></i>
             View Full Personal Info
           </Link>
+          <a
+            :href="`/attendants/${student?.id}/card`"
+            class="inline-flex items-center gap-2 rounded-2xl bg-red-600 px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-red-500"
+          >
+            <i class="fa-solid fa-file-pdf"></i>
+            Download Attendant PDF
+          </a>
         </div>
       </div>
     </Card>
@@ -168,7 +183,7 @@ const notice = {
     'Conference Fee: $25 USD per person',
     'Early registration deadline: March 15, 2026',
     'Full payment required before conference date',
-    'Payment methods: EcoCash, Bank Transfer, Cash'
+    'Payment methods: EcoCash & Cash'
   ]
 };
 

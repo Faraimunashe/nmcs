@@ -34,7 +34,8 @@
           </div>
         </div>
 
-        <div v-if="payments?.data && payments.data.length > 0" class="overflow-x-auto">
+        <!-- Desktop table -->
+        <div v-if="payments?.data && payments.data.length > 0" class="hidden md:block overflow-x-auto">
           <table class="min-w-full divide-y divide-slate-200">
             <thead class="bg-slate-50">
               <tr>
@@ -72,18 +73,20 @@
                   {{ payment.payment_date }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <div v-if="payment.status === 'PENDING'" class="flex items-center justify-end gap-2">
+                  <div v-if="payment.status === 'PENDING'" class="flex items-center justify-end gap-3">
                     <button
                       @click="showRejectModal(payment)"
-                      class="text-red-600 hover:text-red-900"
+                      class="inline-flex items-center gap-1 rounded-2xl bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 ring-1 ring-red-200 hover:bg-red-100 hover:text-red-800"
                     >
                       <i class="fa-solid fa-times-circle"></i>
+                      Reject
                     </button>
                     <button
-                      @click="approvePayment(payment.id)"
-                      class="text-emerald-600 hover:text-emerald-900"
+                      @click="requestApprovePayment(payment.id)"
+                      class="inline-flex items-center gap-1 rounded-2xl bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-emerald-500"
                     >
                       <i class="fa-solid fa-check-circle"></i>
+                      Approve
                     </button>
                   </div>
                   <span v-else-if="payment.status === 'APPROVED'" class="text-xs text-slate-500">
@@ -92,12 +95,74 @@
                   </span>
                   <span v-else-if="payment.status === 'REJECTED'" class="text-xs text-slate-500">
                     Rejected by {{ payment.rejected_by }}<br>
-                    {{ payment.rejected_at }}
+                    {{ payment.rejected_at }}<br>
+                    <span v-if="payment.rejection_reason" class="text-red-600">
+                      Reason: {{ payment.rejection_reason }}
+                    </span>
                   </span>
                 </td>
               </tr>
             </tbody>
           </table>
+        </div>
+
+        <!-- Mobile cards -->
+        <div v-if="payments?.data && payments.data.length > 0" class="space-y-3 md:hidden">
+          <div
+            v-for="payment in payments.data"
+            :key="payment.id"
+            class="rounded-2xl bg-white p-4 ring-1 ring-slate-200 space-y-2"
+          >
+            <div class="flex items-center justify-between gap-3">
+              <div>
+                <div class="text-sm font-semibold text-slate-900">{{ payment.student_name }}</div>
+                <div class="text-xs text-slate-500">{{ payment.student_email }}</div>
+              </div>
+              <Badge :variant="getStatusVariant(payment.status)">
+                {{ payment.status }}
+              </Badge>
+            </div>
+            <div class="flex items-center justify-between text-sm text-slate-700">
+              <span class="font-semibold">${{ payment.amount }}</span>
+              <span class="text-xs text-slate-500">Final: ${{ payment.final_amount }}</span>
+            </div>
+            <div class="flex items-center justify-between text-xs text-slate-600">
+              <span>{{ formatPurpose(payment.purpose) }}</span>
+              <span>{{ payment.payment_method.name }}</span>
+            </div>
+            <div class="flex items-center justify-between text-xs text-slate-500">
+              <span>{{ payment.payment_date }}</span>
+            </div>
+            <div class="pt-2 border-t border-slate-200 text-right">
+              <div v-if="payment.status === 'PENDING'" class="flex items-center justify-end gap-3">
+                <button
+                  @click="showRejectModal(payment)"
+                  class="inline-flex items-center gap-1 rounded-2xl bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 ring-1 ring-red-200 hover:bg-red-100 hover:text-red-800"
+                >
+                  <i class="fa-solid fa-times-circle"></i>
+                  Reject
+                </button>
+                <button
+                  @click="requestApprovePayment(payment.id)"
+                  class="inline-flex items-center gap-1 rounded-2xl bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-emerald-500"
+                >
+                  <i class="fa-solid fa-check-circle"></i>
+                  Approve
+                </button>
+              </div>
+              <div v-else-if="payment.status === 'APPROVED'" class="text-xs text-slate-500 text-left">
+                Approved by {{ payment.approved_by }}<br>
+                {{ payment.approved_at }}
+              </div>
+              <div v-else-if="payment.status === 'REJECTED'" class="text-xs text-slate-500 text-left">
+                Rejected by {{ payment.rejected_by }}<br>
+                {{ payment.rejected_at }}<br>
+                <span v-if="payment.rejection_reason" class="text-red-600">
+                  Reason: {{ payment.rejection_reason }}
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
 
         <EmptyState
@@ -155,6 +220,16 @@
       </Card>
     </div>
   </div>
+
+  <ConfirmDialog
+    :show="showApproveDialog"
+    title="Approve payment?"
+    message="This will mark the payment as approved and update the student's balance."
+    confirm-text="Approve Payment"
+    cancel-text="Cancel"
+    @confirm="approvePayment"
+    @cancel="() => { showApproveDialog = false; approvePaymentId = null; }"
+  />
 </template>
 
 <script setup>
@@ -167,6 +242,7 @@ import PrimaryButton from '../../../Shared/Components/PrimaryButton.vue';
 import DangerButton from '../../../Shared/Components/DangerButton.vue';
 import EmptyState from '../../../Shared/Components/EmptyState.vue';
 import Pagination from '../../../Shared/Components/Pagination.vue';
+import ConfirmDialog from '../../../Shared/Components/ConfirmDialog.vue';
 import { ref } from 'vue';
 
 const props = defineProps({
@@ -184,6 +260,9 @@ const filters = ref({
 
 const showRejectDialog = ref(false);
 const selectedPayment = ref(null);
+
+const showApproveDialog = ref(false);
+const approvePaymentId = ref(null);
 
 const rejectForm = useForm({
   rejection_reason: '',
@@ -214,15 +293,22 @@ const getStatusVariant = (status) => {
   return map[status] || 'default';
 };
 
-const approvePayment = (paymentId) => {
-  if (confirm('Are you sure you want to approve this payment?')) {
-    router.post(`/admin/payments/${paymentId}/approve`, {}, {
-      preserveScroll: true,
-      onSuccess: () => {
-        router.reload({ only: ['payments'] });
-      },
-    });
-  }
+const requestApprovePayment = (paymentId) => {
+  approvePaymentId.value = paymentId;
+  showApproveDialog.value = true;
+};
+
+const approvePayment = () => {
+  if (!approvePaymentId.value) return;
+
+  router.post(`/admin/payments/${approvePaymentId.value}/approve`, {}, {
+    preserveScroll: true,
+    onSuccess: () => {
+      router.reload({ only: ['payments'] });
+      showApproveDialog.value = false;
+      approvePaymentId.value = null;
+    },
+  });
 };
 
 const showRejectModal = (payment) => {

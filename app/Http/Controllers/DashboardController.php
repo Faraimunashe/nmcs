@@ -37,10 +37,12 @@ class DashboardController extends Controller
         $totalPending = Payment::where('student_id', $student->id)
             ->where('status', PaymentStatus::PENDING)
             ->sum('final_amount');
-        
+
         $conferenceFee = ConferenceFee::getActiveFee();
         $conferenceFeeAmount = $conferenceFee ? $conferenceFee->amount : 0;
         $balance = $conferenceFeeAmount - $totalPaid;
+
+        //dd($student->institution);
 
 
         return Inertia::render('Dashboard/Index', [
@@ -64,6 +66,7 @@ class DashboardController extends Controller
                     'name' => $student->institution->name,
                     'code' => $student->institution->code,
                     'region' => $student->institution->region->name ?? null,
+                    'logo' => $student->institution->logo,
                 ] : null,
                 'next_of_kins' => $student->nextOfKins->map(function ($nok) {
                     return [

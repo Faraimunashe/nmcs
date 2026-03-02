@@ -85,6 +85,7 @@ class PaymentController extends Controller
                             'firstnames' => $payment->student->firstnames,
                             'surname' => $payment->student->surname,
                         ],
+                        'rejection_reason' => $payment->rejection_reason,
                     ];
                 }),
                 'links' => $payments->links(),

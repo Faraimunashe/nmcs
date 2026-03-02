@@ -26,6 +26,26 @@
             />
             <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
           </div>
+          <div class="flex items-center gap-2">
+            <a
+              :href="exportUrl('excel')"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-2 rounded-2xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500"
+            >
+              <i class="fa-solid fa-file-excel"></i>
+              Export Excel
+            </a>
+            <a
+              :href="exportUrl('pdf')"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-2 rounded-2xl bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500"
+            >
+              <i class="fa-solid fa-file-pdf"></i>
+              Export PDF
+            </a>
+          </div>
         </div>
 
         <div v-if="students?.data && students.data.length > 0" class="overflow-x-auto">
@@ -151,6 +171,12 @@ const goToPage = (page) => {
     preserveState: true,
     preserveScroll: true,
   });
+};
+
+const exportUrl = (format) => {
+  const params = new URLSearchParams({ type: props.type, format });
+  if (filters.value.search) params.set('search', filters.value.search);
+  return `/admin/attendants/export?${params.toString()}`;
 };
 </script>
 

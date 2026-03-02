@@ -66,7 +66,8 @@
           </div>
         </div>
 
-        <div v-if="payments?.data && payments.data.length > 0" class="overflow-x-auto">
+        <!-- Desktop table -->
+        <div v-if="payments?.data && payments.data.length > 0" class="hidden md:block overflow-x-auto">
           <table class="min-w-full divide-y divide-slate-200">
             <thead class="bg-slate-50">
               <tr>
@@ -100,7 +101,10 @@
                   </Badge>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
-                  {{ payment.reference || '-' }}
+                  <div>{{ payment.reference || '-' }}</div>
+                  <div v-if="payment.status === 'REJECTED' && payment.rejection_reason" class="mt-1 text-xs text-red-600">
+                    Reason: {{ payment.rejection_reason }}
+                  </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <button
@@ -116,6 +120,51 @@
               </tr>
             </tbody>
           </table>
+        </div>
+
+        <!-- Mobile cards -->
+        <div v-if="payments?.data && payments.data.length > 0" class="space-y-3 md:hidden">
+          <div
+            v-for="payment in payments.data"
+            :key="payment.id"
+            class="rounded-2xl bg-white p-4 ring-1 ring-slate-200 space-y-2"
+          >
+            <div class="flex items-center justify-between gap-3">
+              <div class="space-y-1">
+                <div class="text-sm font-semibold text-slate-900">{{ formatPurpose(payment.purpose) }}</div>
+                <div class="text-xs text-slate-500">
+                  {{ payment.payment_method.name }} • {{ payment.payment_date }}
+                </div>
+              </div>
+              <Badge :variant="getStatusVariant(payment.status)">
+                {{ payment.status }}
+              </Badge>
+            </div>
+            <div class="flex items-center justify-between text-sm text-slate-700">
+              <span class="font-semibold">${{ payment.amount }}</span>
+              <span class="text-xs text-slate-500">Credited: ${{ payment.final_amount }}</span>
+            </div>
+            <div class="text-xs text-slate-600">
+              Reference: <span class="font-mono">{{ payment.reference || '-' }}</span>
+            </div>
+            <div
+              v-if="payment.status === 'REJECTED' && payment.rejection_reason"
+              class="text-xs text-red-600"
+            >
+              Reason: {{ payment.rejection_reason }}
+            </div>
+            <div class="pt-2 border-t border-slate-200 text-right">
+              <button
+                v-if="payment.status === 'PENDING'"
+                @click="$inertia.visit(`/payments/${payment.id}/edit`)"
+                class="inline-flex items-center gap-1 rounded-2xl bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-emerald-500"
+              >
+                <i class="fas fa-edit"></i>
+                Edit Payment
+              </button>
+              <span v-else class="text-xs text-slate-400">No actions available</span>
+            </div>
+          </div>
         </div>
 
         <EmptyState

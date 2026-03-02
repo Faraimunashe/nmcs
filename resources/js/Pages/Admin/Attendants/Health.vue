@@ -2,15 +2,40 @@
   <Head :title="title" />
   
   <div class="space-y-6">
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
       <div>
         <h1 class="text-2xl font-semibold text-slate-900">{{ title }}</h1>
-        <p class="mt-1 text-sm text-slate-500">List of students with {{ type === 'dietary' ? 'dietary requirements' : type === 'chronic' ? 'chronic conditions' : 'disabilities' }}</p>
+        <p class="mt-1 text-sm text-slate-500">
+          List of students with
+          {{ type === 'dietary' ? 'dietary requirements' : type === 'chronic' ? 'chronic conditions' : 'disabilities' }}
+        </p>
       </div>
       <Link href="/admin/dashboard" class="text-sm font-semibold text-slate-600 hover:text-slate-800">
         <i class="fa-solid fa-arrow-left mr-2"></i>
         Back to Dashboard
       </Link>
+    </div>
+
+    <div v-if="conditionStats && conditionStats.length" class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <Card
+        v-for="condition in conditionStats"
+        :key="condition.id"
+        class="flex items-center justify-between"
+      >
+        <div>
+          <p class="text-sm font-semibold text-slate-900">{{ condition.name }}</p>
+          <p class="text-xs text-slate-500">
+            Attendants with this
+            {{ type === 'dietary' ? 'requirement' : type === 'chronic' ? 'condition' : 'disability' }}
+          </p>
+        </div>
+        <div
+          class="text-2xl font-semibold"
+          :class="type === 'dietary' ? 'text-blue-700' : type === 'chronic' ? 'text-orange-700' : 'text-purple-700'"
+        >
+          {{ condition.count }}
+        </div>
+      </Card>
     </div>
 
     <Card>
@@ -25,6 +50,26 @@
               class="w-full rounded-2xl bg-white px-4 py-2 pl-11 text-sm text-slate-900 placeholder:text-slate-400 ring-1 ring-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-400/40"
             />
             <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+          </div>
+          <div class="flex items-center gap-2">
+            <a
+              :href="exportUrl('excel')"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-2 rounded-2xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500"
+            >
+              <i class="fa-solid fa-file-excel"></i>
+              Export Excel
+            </a>
+            <a
+              :href="exportUrl('pdf')"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-2 rounded-2xl bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500"
+            >
+              <i class="fa-solid fa-file-pdf"></i>
+              Export PDF
+            </a>
           </div>
         </div>
 
@@ -116,6 +161,10 @@ const props = defineProps({
   type: String,
   students: Object,
   filters: Object,
+  conditionStats: {
+    type: Array,
+    default: () => [],
+  },
 });
 
 const filters = ref({
@@ -133,6 +182,12 @@ const applyFilters = () => {
     preserveState: true,
     preserveScroll: true,
   });
+};
+
+const exportUrl = (format) => {
+  const params = new URLSearchParams({ type: props.type, format });
+  if (filters.value.search) params.set('search', filters.value.search);
+  return `/admin/attendants/export?${params.toString()}`;
 };
 </script>
 
