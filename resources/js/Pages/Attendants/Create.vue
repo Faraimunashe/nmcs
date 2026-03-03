@@ -64,10 +64,10 @@
             />
             <TextInput
               v-model="form.nationalid"
-              label="National ID"
-              placeholder="e.g. 63-123456-A12"
+              label="National ID (format: 63-123456-A12)"
+              placeholder="63-123456-A12"
               :error="form.errors.nationalid"
-              hint="Optional but recommended"
+              hint="Optional but recommended. Use format 63-123456-A12"
             />
           </div>
 
@@ -102,8 +102,8 @@
           <div v-for="(phone, index) in form.phones" :key="index" class="flex gap-3">
             <TextInput
               v-model="form.phones[index]"
-              :label="index === 0 ? 'Phone Number' : 'Additional Phone'"
-              placeholder="+263 77 123 4567"
+              :label="index === 0 ? 'Phone Number (format: +263771234567)' : 'Additional Phone (format: +263771234567)'"
+              placeholder="+263771234567"
               required
               :error="form.errors[`phones.${index}`]"
               class="flex-1"
@@ -167,8 +167,8 @@
               />
               <TextInput
                 v-model="form.next_of_kins[index].phone"
-                label="Phone Number"
-                placeholder="+263 77 123 4567"
+                label="Phone Number (format: +263771234567)"
+                placeholder="+263771234567"
                 :error="form.errors[`next_of_kins.${index}.phone`]"
               />
             </div>
@@ -433,6 +433,55 @@ const handleSubmit = () => {
     },
     onError: (errors) => {
       console.error('Form submission errors:', errors);
+      // Move to the earliest step that has a validation error
+      const getStepIndexForField = (field) => {
+        // Step 0: personal information & institution
+        if (
+          ['firstnames', 'surname', 'gender', 'nationalid', 'address', 'institution_id'].includes(field)
+        ) {
+          return 0;
+        }
+
+        // Step 1: phones
+        if (field === 'phones' || field.startsWith('phones.')) {
+          return 1;
+        }
+
+        // Step 2: membership
+        if (field === 'membership_id') {
+          return 2;
+        }
+
+        // Step 3: next of kins
+        if (field === 'next_of_kins' || field.startsWith('next_of_kins.')) {
+          return 3;
+        }
+
+        // Step 4: health & special needs
+        if (
+          field === 'disability_ids' ||
+          field === 'dietary_ids' ||
+          field === 'chronic_condition_ids' ||
+          field.startsWith('disability_ids.') ||
+          field.startsWith('dietary_ids.') ||
+          field.startsWith('chronic_condition_ids.')
+        ) {
+          return 4;
+        }
+
+        // Default to first step if unknown field
+        return 0;
+      };
+
+      let earliestStep = steps.length - 1;
+      Object.keys(errors).forEach((field) => {
+        const stepIndex = getStepIndexForField(field);
+        if (stepIndex < earliestStep) {
+          earliestStep = stepIndex;
+        }
+      });
+
+      currentStep.value = earliestStep;
     }
   });
 };
