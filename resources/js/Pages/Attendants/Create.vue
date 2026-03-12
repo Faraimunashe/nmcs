@@ -64,7 +64,7 @@
             />
             <TextInput
               v-model="form.nationalid"
-              label="National ID (format: 63-123456-A12)"
+              label="National ID (format: 63-123456-A-12)"
               placeholder="63-123456-A12"
               :error="form.errors.nationalid"
               hint="Optional but recommended. Use format 63-123456-A12"
