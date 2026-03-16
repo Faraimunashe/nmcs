@@ -24,9 +24,6 @@
           </div>
         </div>
 
-        <span class="hidden sm:inline-flex text-xs text-slate-500">
-          Mobile-first • Green &amp; White
-        </span>
       </div>
     </header>
 
@@ -38,7 +35,7 @@
         <section class="hidden lg:block">
           <div class="max-w-lg">
             <h1 class="text-4xl font-semibold tracking-tight text-slate-900">
-              Create your account ✨
+              Create your account
             </h1>
 
             <p class="mt-4 text-base text-slate-600">

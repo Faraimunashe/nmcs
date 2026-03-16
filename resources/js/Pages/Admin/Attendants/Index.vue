@@ -49,9 +49,15 @@
             <thead class="bg-slate-50">
               <tr>
                 <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-700">Name</th>
-                <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-700">Email</th>
-                <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-700">Institution</th>
-                <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-700">Region</th>
+                <th class="hidden md:table-cell px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-700">
+                  Email
+                </th>
+                <th class="hidden lg:table-cell px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-700">
+                  Institution
+                </th>
+                <th class="hidden lg:table-cell px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-700">
+                  Region
+                </th>
                 <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-700">Total Paid</th>
                 <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-700">Balance</th>
                 <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-700">Actions</th>
@@ -63,13 +69,13 @@
                   <div class="text-sm font-semibold text-slate-900">{{ student.firstnames }} {{ student.surname }}</div>
                   <div class="text-xs text-slate-500">{{ student.gender }}</div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
+                <td class="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm text-slate-600">
                   {{ student.email }}
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
+                <td class="hidden lg:table-cell px-6 py-4 whitespace-nowrap text-sm text-slate-600">
                   {{ student.institution }}
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
+                <td class="hidden lg:table-cell px-6 py-4 whitespace-nowrap text-sm text-slate-600">
                   {{ student.region }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">

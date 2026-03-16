@@ -9,6 +9,8 @@ use App\Models\Payment;
 use App\Models\PaymentMethod;
 use App\Models\PaymentRecipient;
 use App\Models\Student;
+use App\Models\User;
+use App\Services\TwilioSmsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -191,6 +193,26 @@ class PaymentController extends Controller
             ]);
 
             DB::commit();
+
+            // Notify admins via SMS about pending payment
+            $adminPhones = config('twilio.admin_phones', []);
+            if (!empty($adminPhones)) {
+                $studentName = trim($student->firstnames . ' ' . $student->surname);
+                $amount = number_format($payment->final_amount, 2);
+                $appUrl = config('app.url');
+                $message = sprintf(
+                    'Pending payment recorded: %s, amount %s, purpose %s. Kindly review and take the necessary action. %s',
+                    $studentName,
+                    $amount,
+                    $payment->purpose instanceof \BackedEnum ? $payment->purpose->value : $payment->purpose,
+                    $appUrl ? 'More details: ' . $appUrl : ''
+                );
+
+                $sms = app(TwilioSmsService::class);
+                foreach ($adminPhones as $phone) {
+                    $sms->send($phone, $message);
+                }
+            }
 
             return redirect('/payments')
                 ->with('success', 'Payment recorded successfully. Awaiting approval.');

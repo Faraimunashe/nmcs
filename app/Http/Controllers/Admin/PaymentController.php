@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\PaymentStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Payment;
+use App\Services\TwilioSmsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -76,7 +77,7 @@ class PaymentController extends Controller
 
     public function approve(Request $request, $id)
     {
-        $payment = Payment::findOrFail($id);
+        $payment = Payment::with(['student.phones'])->findOrFail($id);
 
         if ($payment->status !== PaymentStatus::PENDING) {
             return back()->with('error', 'Only pending payments can be approved.');
@@ -92,6 +93,22 @@ class PaymentController extends Controller
 
             DB::commit();
 
+            // Notify user via SMS about approval
+            $student = $payment->student;
+            $phone = optional($student->phones()->first())->phone;
+            if ($phone) {
+                $appUrl = config('app.url');
+                app(TwilioSmsService::class)->send(
+                    $phone,
+                    sprintf(
+                        'Hi %s, your payment of %s for the NMCS conference has been APPROVED. Thank you! %s',
+                        trim($student->firstnames . ' ' . $student->surname),
+                        number_format($payment->final_amount, 2),
+                        $appUrl ? 'More details: ' . $appUrl : ''
+                    )
+                );
+            }
+
             return back()->with('success', 'Payment approved successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -105,7 +122,7 @@ class PaymentController extends Controller
             'rejection_reason' => ['required', 'string', 'max:500'],
         ]);
 
-        $payment = Payment::findOrFail($id);
+        $payment = Payment::with(['student.phones'])->findOrFail($id);
 
         if ($payment->status !== PaymentStatus::PENDING) {
             return back()->with('error', 'Only pending payments can be rejected.');
@@ -121,6 +138,23 @@ class PaymentController extends Controller
             ]);
 
             DB::commit();
+
+            // Notify user via SMS about rejection
+            $student = $payment->student;
+            $phone = optional($student->phones()->first())->phone;
+            if ($phone) {
+                $appUrl = config('app.url');
+                app(TwilioSmsService::class)->send(
+                    $phone,
+                    sprintf(
+                        'Hi %s, your payment of %s for the NMCS conference has been REJECTED. Reason: %s %s',
+                        trim($student->firstnames . ' ' . $student->surname),
+                        number_format($payment->final_amount, 2),
+                        $payment->rejection_reason,
+                        $appUrl ? 'More details: ' . $appUrl : ''
+                    )
+                );
+            }
 
             return back()->with('success', 'Payment rejected successfully.');
         } catch (\Exception $e) {

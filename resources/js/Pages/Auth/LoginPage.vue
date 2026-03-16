@@ -37,7 +37,7 @@
         <section class="hidden lg:block">
           <div class="max-w-lg">
             <h1 class="text-4xl font-semibold tracking-tight text-slate-900">
-              Welcome 👋
+              Welcome
             </h1>
 
             <p class="mt-4 text-base text-slate-600">
