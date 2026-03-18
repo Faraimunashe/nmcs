@@ -12,10 +12,17 @@ class DietaryController extends Controller
     public function index()
     {
         $dietaries = Dietary::orderBy('name')
-            ->get(['id', 'name', 'description']);
+            ->paginate(20, ['id', 'name', 'description'])
+            ->withQueryString();
 
         return Inertia::render('Admin/Settings/Dietaries/Index', [
-            'dietaries' => $dietaries,
+            'dietaries' => [
+                'data' => $dietaries->items(),
+                'links' => $dietaries->links(),
+                'from' => $dietaries->firstItem(),
+                'to' => $dietaries->lastItem(),
+                'total' => $dietaries->total(),
+            ],
         ]);
     }
 

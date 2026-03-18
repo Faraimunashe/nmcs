@@ -31,9 +31,9 @@
         <PrimaryButton type="submit" :processing="dietaryForm.processing" size="sm" @click="submitDietary">
           Add Dietary Option
         </PrimaryButton>
-        <div v-if="dietaries && dietaries.length > 0" class="space-y-2 max-h-64 overflow-y-auto">
+        <div v-if="dietaries && dietaries.data && dietaries.data.length > 0" class="space-y-2">
           <div
-            v-for="item in dietaries"
+            v-for="item in dietaries.data"
             :key="item.id"
             class="flex items-center justify-between rounded-2xl bg-slate-50 px-3 py-2 ring-1 ring-slate-200"
           >
@@ -49,6 +49,7 @@
               <i class="fa-solid fa-trash-can"></i>
             </button>
           </div>
+          <Pagination :links="dietaries.links" />
         </div>
         <p v-else class="text-xs text-slate-500">No dietary options defined.</p>
       </div>
@@ -62,9 +63,10 @@ import Layout from '../../../../Shared/Layout.vue';
 import Card from '../../../../Shared/Components/Card.vue';
 import TextInput from '../../../../Shared/Components/TextInput.vue';
 import PrimaryButton from '../../../../Shared/Components/PrimaryButton.vue';
+import Pagination from '../../../../Shared/Components/Pagination.vue';
 
 const props = defineProps({
-  dietaries: Array,
+  dietaries: Object,
 });
 
 const dietaryForm = useForm({
