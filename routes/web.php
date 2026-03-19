@@ -34,7 +34,7 @@ Route::middleware(['auth', 'require.student'])->group(function () {
     Route::get('/attendants', [\App\Http\Controllers\StudentController::class, 'index'])->name('attendants.index');
     Route::get('/attendants/{id}', [\App\Http\Controllers\StudentController::class, 'show'])->name('attendants.show');
     Route::get('/attendants/{id}/card', [\App\Http\Controllers\StudentController::class, 'downloadCard'])->name('attendants.card');
-    Route::resource('payments', \App\Http\Controllers\PaymentController::class)->only(['index', 'create', 'store', 'edit', 'update'])->names('payments');
+    Route::resource('payments', \App\Http\Controllers\PaymentController::class)->only(['index', 'create', 'store', 'edit', 'update', 'show'])->names('payments');
 });
 
 Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
@@ -54,6 +54,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/attendants/verify/{id}', [\App\Http\Controllers\Admin\AttendantController::class, 'verify'])->name('admin.attendants.verify');
 
     Route::get('/payments', [\App\Http\Controllers\Admin\PaymentController::class, 'index'])->name('admin.payments.index');
+    Route::get('/payments/{id}', [\App\Http\Controllers\Admin\PaymentController::class, 'show'])->name('admin.payments.show');
     Route::post('/payments/{id}/approve', [\App\Http\Controllers\Admin\PaymentController::class, 'approve'])->name('admin.payments.approve');
     Route::post('/payments/{id}/reject', [\App\Http\Controllers\Admin\PaymentController::class, 'reject'])->name('admin.payments.reject');
 

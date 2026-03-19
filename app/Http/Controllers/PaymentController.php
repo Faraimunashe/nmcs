@@ -33,8 +33,9 @@ class PaymentController extends Controller
             $query->where('purpose', $request->purpose);
         }
 
-        if ($request->method) {
-            $query->where('payment_method_id', $request->method);
+        $method = $request->get('method');
+        if (!empty($method)) {
+            $query->where('payment_method_id', $method);
         }
 
         if ($request->date_from) {
@@ -107,6 +108,43 @@ class PaymentController extends Controller
                 'total_pending' => number_format($totalPending, 2),
                 'balance' => number_format($balance, 2),
                 'conference_fee' => number_format($conferenceFeeAmount, 2),
+            ],
+        ]);
+    }
+
+    public function show(Request $request, $id)
+    {
+        $user = $request->user();
+
+        $payment = Payment::whereHas('student', function ($q) use ($user) {
+            $q->where('user_id', $user->id);
+        })
+            ->with(['student', 'paymentMethod', 'paymentRecipient'])
+            ->findOrFail($id);
+
+        return Inertia::render('Payments/Show', [
+            'payment' => [
+                'id' => $payment->id,
+                'amount' => number_format($payment->amount, 2),
+                'final_amount' => number_format($payment->final_amount, 2),
+                'purpose' => $payment->purpose instanceof \BackedEnum ? $payment->purpose->value : $payment->purpose,
+                'status' => $payment->status instanceof \BackedEnum ? $payment->status->value : $payment->status,
+                'reference' => $payment->reference,
+                'description' => $payment->description,
+                'payment_date' => $payment->payment_date->format('Y-m-d'),
+                'created_at' => $payment->created_at->format('Y-m-d H:i'),
+                'payment_method' => [
+                    'id' => $payment->paymentMethod->id,
+                    'name' => $payment->paymentMethod->name,
+                ],
+                'payment_recipient' => $payment->paymentRecipient ? [
+                    'name' => $payment->paymentRecipient->name,
+                ] : null,
+                'student' => [
+                    'firstnames' => $payment->student->firstnames,
+                    'surname' => $payment->student->surname,
+                ],
+                'rejection_reason' => $payment->rejection_reason,
             ],
         ]);
     }

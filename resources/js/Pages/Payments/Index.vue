@@ -81,7 +81,12 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-200 bg-white">
-              <tr v-for="payment in payments.data" :key="payment.id" class="hover:bg-slate-50">
+              <tr
+                v-for="payment in payments.data"
+                :key="payment.id"
+                class="hover:bg-slate-50 cursor-pointer"
+                @click="$inertia.visit(`/payments/${payment.id}`)"
+              >
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
                   {{ payment.payment_date }}
                 </td>
@@ -109,13 +114,20 @@
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <button
                     v-if="payment.status === 'PENDING'"
-                    @click="$inertia.visit(`/payments/${payment.id}/edit`)"
+                    @click.stop="$inertia.visit(`/payments/${payment.id}/edit`)"
                     class="text-emerald-600 hover:text-emerald-900"
                   >
                     <i class="fas fa-edit mr-1"></i>
                     Edit
                   </button>
-                  <span v-else class="text-slate-400">-</span>
+                  <button
+                    v-else
+                    @click.stop="$inertia.visit(`/payments/${payment.id}`)"
+                    class="text-slate-600 hover:text-slate-900"
+                  >
+                    <i class="fas fa-eye mr-1"></i>
+                    View
+                  </button>
                 </td>
               </tr>
             </tbody>
@@ -128,6 +140,7 @@
             v-for="payment in payments.data"
             :key="payment.id"
             class="rounded-2xl bg-white p-4 ring-1 ring-slate-200 space-y-2"
+            @click="$inertia.visit(`/payments/${payment.id}`)"
           >
             <div class="flex items-center justify-between gap-3">
               <div class="space-y-1">
@@ -156,13 +169,20 @@
             <div class="pt-2 border-t border-slate-200 text-right">
               <button
                 v-if="payment.status === 'PENDING'"
-                @click="$inertia.visit(`/payments/${payment.id}/edit`)"
+                @click.stop="$inertia.visit(`/payments/${payment.id}/edit`)"
                 class="inline-flex items-center gap-1 rounded-2xl bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-emerald-500"
               >
                 <i class="fas fa-edit"></i>
                 Edit Payment
               </button>
-              <span v-else class="text-xs text-slate-400">No actions available</span>
+              <button
+                v-else
+                @click.stop="$inertia.visit(`/payments/${payment.id}`)"
+                class="inline-flex items-center gap-1 rounded-2xl bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-200"
+              >
+                <i class="fas fa-eye"></i>
+                View Details
+              </button>
             </div>
           </div>
         </div>

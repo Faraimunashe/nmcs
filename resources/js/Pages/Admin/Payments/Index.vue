@@ -49,7 +49,12 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-200 bg-white">
-              <tr v-for="payment in payments.data" :key="payment.id" class="hover:bg-slate-50">
+              <tr
+                v-for="payment in payments.data"
+                :key="payment.id"
+                class="hover:bg-slate-50 cursor-pointer"
+                @click="$inertia.visit(`/admin/payments/${payment.id}`)"
+              >
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm font-semibold text-slate-900">{{ payment.student_name }}</div>
                   <div class="text-xs text-slate-500">{{ payment.student_email }}</div>
@@ -75,31 +80,28 @@
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <div v-if="payment.status === 'PENDING'" class="flex items-center justify-end gap-3">
                     <button
-                      @click="showRejectModal(payment)"
+                      @click.stop="showRejectModal(payment)"
                       class="inline-flex items-center gap-1 rounded-2xl bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 ring-1 ring-red-200 hover:bg-red-100 hover:text-red-800"
                     >
                       <i class="fa-solid fa-times-circle"></i>
                       Reject
                     </button>
                     <button
-                      @click="requestApprovePayment(payment.id)"
+                      @click.stop="requestApprovePayment(payment.id)"
                       class="inline-flex items-center gap-1 rounded-2xl bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-emerald-500"
                     >
                       <i class="fa-solid fa-check-circle"></i>
                       Approve
                     </button>
                   </div>
-                  <span v-else-if="payment.status === 'APPROVED'" class="text-xs text-slate-500">
-                    Approved by {{ payment.approved_by }}<br>
-                    {{ payment.approved_at }}
-                  </span>
-                  <span v-else-if="payment.status === 'REJECTED'" class="text-xs text-slate-500">
-                    Rejected by {{ payment.rejected_by }}<br>
-                    {{ payment.rejected_at }}<br>
-                    <span v-if="payment.rejection_reason" class="text-red-600">
-                      Reason: {{ payment.rejection_reason }}
-                    </span>
-                  </span>
+                  <button
+                    v-else
+                    @click.stop="$inertia.visit(`/admin/payments/${payment.id}`)"
+                    class="inline-flex items-center gap-1 rounded-2xl bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-200"
+                  >
+                    <i class="fa-solid fa-eye"></i>
+                    View Details
+                  </button>
                 </td>
               </tr>
             </tbody>
@@ -112,6 +114,7 @@
             v-for="payment in payments.data"
             :key="payment.id"
             class="rounded-2xl bg-white p-4 ring-1 ring-slate-200 space-y-2"
+            @click="$inertia.visit(`/admin/payments/${payment.id}`)"
           >
             <div class="flex items-center justify-between gap-3">
               <div>
@@ -136,31 +139,28 @@
             <div class="pt-2 border-t border-slate-200 text-right">
               <div v-if="payment.status === 'PENDING'" class="flex items-center justify-end gap-3">
                 <button
-                  @click="showRejectModal(payment)"
+                  @click.stop="showRejectModal(payment)"
                   class="inline-flex items-center gap-1 rounded-2xl bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 ring-1 ring-red-200 hover:bg-red-100 hover:text-red-800"
                 >
                   <i class="fa-solid fa-times-circle"></i>
                   Reject
                 </button>
                 <button
-                  @click="requestApprovePayment(payment.id)"
+                  @click.stop="requestApprovePayment(payment.id)"
                   class="inline-flex items-center gap-1 rounded-2xl bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-emerald-500"
                 >
                   <i class="fa-solid fa-check-circle"></i>
                   Approve
                 </button>
               </div>
-              <div v-else-if="payment.status === 'APPROVED'" class="text-xs text-slate-500 text-left">
-                Approved by {{ payment.approved_by }}<br>
-                {{ payment.approved_at }}
-              </div>
-              <div v-else-if="payment.status === 'REJECTED'" class="text-xs text-slate-500 text-left">
-                Rejected by {{ payment.rejected_by }}<br>
-                {{ payment.rejected_at }}<br>
-                <span v-if="payment.rejection_reason" class="text-red-600">
-                  Reason: {{ payment.rejection_reason }}
-                </span>
-              </div>
+              <button
+                v-else
+                @click.stop="$inertia.visit(`/admin/payments/${payment.id}`)"
+                class="inline-flex items-center gap-1 rounded-2xl bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-200"
+              >
+                <i class="fa-solid fa-eye"></i>
+                View Details
+              </button>
             </div>
           </div>
         </div>

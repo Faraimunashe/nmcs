@@ -24,8 +24,9 @@ class PaymentController extends Controller
             $query->where('purpose', $request->purpose);
         }
 
-        if ($request->method) {
-            $query->where('payment_method_id', $request->method);
+        $method = $request->get('method');
+        if (!empty($method)) {
+            $query->where('payment_method_id', $method);
         }
 
         if ($request->date_from) {
@@ -72,6 +73,61 @@ class PaymentController extends Controller
                 'total' => $payments->total(),
             ],
             'filters' => $request->only(['status', 'purpose', 'method', 'date_from', 'date_to']),
+        ]);
+    }
+
+    public function show(Request $request, $id)
+    {
+        $payment = Payment::with([
+            'student.user',
+            'student.membership',
+            'student.institution.region',
+            'paymentMethod',
+            'paymentRecipient',
+            'approvedBy',
+            'rejectedBy',
+        ])->findOrFail($id);
+
+        return Inertia::render('Admin/Payments/Show', [
+            'payment' => [
+                'id' => $payment->id,
+                'amount' => number_format($payment->amount, 2),
+                'final_amount' => number_format($payment->final_amount, 2),
+                'purpose' => $payment->purpose instanceof \BackedEnum ? $payment->purpose->value : $payment->purpose,
+                'status' => $payment->status instanceof \BackedEnum ? $payment->status->value : $payment->status,
+                'reference' => $payment->reference,
+                'description' => $payment->description,
+                'payment_date' => $payment->payment_date->format('Y-m-d'),
+                'created_at' => $payment->created_at->format('Y-m-d H:i'),
+                'student' => [
+                    'name' => $payment->student->firstnames . ' ' . $payment->student->surname,
+                    'email' => $payment->student->user->email ?? 'N/A',
+                    'institution' => $payment->student->institution ? [
+                        'name' => $payment->student->institution->name,
+                        'code' => $payment->student->institution->code,
+                    ] : null,
+                    'region' => $payment->student->institution?->region ? [
+                        'name' => $payment->student->institution->region->name,
+                    ] : null,
+                    'membership' => $payment->student->membership ? [
+                        'status' => $payment->student->membership->status instanceof \BackedEnum
+                            ? $payment->student->membership->status->value
+                            : ($payment->student->membership->status ?? null),
+                        'description' => $payment->student->membership->description,
+                    ] : null,
+                ],
+                'payment_method' => [
+                    'name' => $payment->paymentMethod->name ?? 'N/A',
+                ],
+                'payment_recipient' => $payment->paymentRecipient ? [
+                    'name' => $payment->paymentRecipient->name,
+                ] : null,
+                'approved_by' => $payment->approvedBy ? $payment->approvedBy->name : null,
+                'approved_at' => $payment->approved_at ? $payment->approved_at->format('Y-m-d H:i') : null,
+                'rejected_by' => $payment->rejectedBy ? $payment->rejectedBy->name : null,
+                'rejected_at' => $payment->rejected_at ? $payment->rejected_at->format('Y-m-d H:i') : null,
+                'rejection_reason' => $payment->rejection_reason,
+            ],
         ]);
     }
 
