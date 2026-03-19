@@ -117,7 +117,7 @@
         />
 
         <Pagination
-          v-if="students.links && students.links.length > 3"
+          v-if="students.links && students.links.length > 1"
           :links="students.links"
           :from="students.from"
           :to="students.to"
