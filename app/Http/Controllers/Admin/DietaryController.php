@@ -18,7 +18,8 @@ class DietaryController extends Controller
         return Inertia::render('Admin/Settings/Dietaries/Index', [
             'dietaries' => [
                 'data' => $dietaries->items(),
-                'links' => $dietaries->links(),
+                // Pagination links as JSON-safe array (url/label/active)
+                'links' => $dietaries->linkCollection()->toArray(),
                 'from' => $dietaries->firstItem(),
                 'to' => $dietaries->lastItem(),
                 'total' => $dietaries->total(),

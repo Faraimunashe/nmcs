@@ -69,7 +69,8 @@ class AttendantController extends Controller
                         'registered_at' => $student->created_at->format('Y-m-d H:i'),
                     ];
                 }),
-                'links' => $students->links(),
+                // Pagination links as JSON-safe array (url/label/active)
+                'links' => $students->linkCollection()->toArray(),
                 'from' => $students->firstItem(),
                 'to' => $students->lastItem(),
                 'total' => $students->total(),
@@ -182,7 +183,8 @@ class AttendantController extends Controller
                         'registered_at' => $student->created_at->format('Y-m-d H:i'),
                     ];
                 }),
-                'links' => $students->links(),
+                // Pagination links as JSON-safe array (url/label/active)
+                'links' => $students->linkCollection()->toArray(),
                 'from' => $students->firstItem(),
                 'to' => $students->lastItem(),
                 'total' => $students->total(),
@@ -238,7 +240,8 @@ class AttendantController extends Controller
                         'registered_at' => $student->created_at->format('Y-m-d H:i'),
                     ];
                 }),
-                'links' => $students->links(),
+                // Pagination links as JSON-safe array (url/label/active)
+                'links' => $students->linkCollection()->toArray(),
                 'from' => $students->firstItem(),
                 'to' => $students->lastItem(),
                 'total' => $students->total(),
@@ -294,7 +297,8 @@ class AttendantController extends Controller
                         'registered_at' => $student->created_at->format('Y-m-d H:i'),
                     ];
                 }),
-                'links' => $students->links(),
+                // Pagination links as JSON-safe array (url/label/active)
+                'links' => $students->linkCollection()->toArray(),
                 'from' => $students->firstItem(),
                 'to' => $students->lastItem(),
                 'total' => $students->total(),

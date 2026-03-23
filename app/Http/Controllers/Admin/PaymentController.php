@@ -67,7 +67,8 @@ class PaymentController extends Controller
                         'rejection_reason' => $payment->rejection_reason,
                     ];
                 }),
-                'links' => $payments->links(),
+                // Pagination links as JSON-safe array (url/label/active)
+                'links' => $payments->linkCollection()->toArray(),
                 'from' => $payments->firstItem(),
                 'to' => $payments->lastItem(),
                 'total' => $payments->total(),

@@ -44,7 +44,9 @@ class UserController extends Controller
                         'created_at' => $user->created_at?->format('Y-m-d H:i'),
                     ];
                 }),
-                'links' => $users->links(),
+                // Send pagination links as JSON-safe array (url/label/active),
+                // matching what `resources/js/Shared/Components/Pagination.vue` expects.
+                'links' => $users->linkCollection()->toArray(),
                 'from' => $users->firstItem(),
                 'to' => $users->lastItem(),
                 'total' => $users->total(),
