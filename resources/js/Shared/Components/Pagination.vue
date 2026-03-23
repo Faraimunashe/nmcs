@@ -5,11 +5,16 @@
         v-for="(link, index) in links"
         :key="index"
         :class="{
-          'bg-gray-300 text-gray-500 cursor-not-allowed': !link.url,
-          'bg-blue-500 text-white': link.active,
-          'hover:bg-blue-500 hover:text-white': link.url && !link.active,
-          'text-blue-700': !link.active && link.url,
-          'border-gray-300': !link.active && link.url
+          // Disabled
+          'bg-slate-100 text-slate-400 cursor-not-allowed': !link.url,
+          // Active
+          'bg-emerald-600 text-white': link.active,
+          // Hover for clickable pages
+          'hover:bg-emerald-500 hover:text-white': link.url && !link.active,
+          // Default clickable
+          'text-emerald-700': !link.active && link.url,
+          // Default border for clickable
+          'border-emerald-200': !link.active && link.url
         }"
         class="px-4 py-2 border rounded-lg shadow-sm transition duration-150 ease-in-out"
       >
