@@ -1,6 +1,6 @@
 <template>
   <Head title="Admin - Payments" />
-  
+
   <div class="space-y-6">
     <div>
       <h1 class="text-2xl font-semibold text-slate-900">Payments Management</h1>
@@ -173,7 +173,7 @@
         />
 
         <Pagination
-          v-if="payments.links && payments.links.length > 3"
+          v-if="payments.links"
           :links="payments.links"
           :from="payments.from"
           :to="payments.to"
@@ -324,7 +324,7 @@ const closeRejectModal = () => {
 
 const rejectPayment = () => {
   if (!selectedPayment.value) return;
-  
+
   rejectForm.post(`/admin/payments/${selectedPayment.value.id}/reject`, {
     preserveScroll: true,
     onSuccess: () => {

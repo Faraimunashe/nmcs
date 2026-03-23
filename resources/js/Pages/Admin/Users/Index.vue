@@ -106,7 +106,7 @@
         />
 
         <Pagination
-          v-if="users.links && users.links.length > 1"
+          v-if="users.links"
           :links="users.links"
           :from="users.from"
           :to="users.to"

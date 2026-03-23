@@ -1,6 +1,6 @@
 <template>
   <Head title="Admin - Attendants" />
-  
+
   <div class="space-y-6">
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
@@ -117,7 +117,7 @@
         />
 
         <Pagination
-          v-if="students.links && students.links.length > 1"
+          v-if="students.links"
           :links="students.links"
           :from="students.from"
           :to="students.to"
