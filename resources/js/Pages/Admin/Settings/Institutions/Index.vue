@@ -56,7 +56,8 @@
           </div>
         </form>
 
-        <div v-if="institutions && institutions.length > 0" class="space-y-2 max-h-72 overflow-y-auto">
+        <!-- Let the whole page scroll (no internal scrollbar in the Card) -->
+        <div v-if="institutions && institutions.length > 0" class="space-y-2">
           <div
             v-for="institution in institutions"
             :key="institution.id"
