@@ -3,7 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\PaymentStatus;
+use App\Events\ConferenceFeesFullyPaid;
+use App\Events\PaymentApproved;
+use App\Events\PaymentRejected;
 use App\Http\Controllers\Controller;
+use App\Models\ConferenceFee;
 use App\Models\Payment;
 use App\Services\TwilioSmsService;
 use Illuminate\Http\Request;
@@ -25,7 +29,7 @@ class PaymentController extends Controller
         }
 
         $method = $request->get('method');
-        if (!empty($method)) {
+        if (! empty($method)) {
             $query->where('payment_method_id', $method);
         }
 
@@ -44,7 +48,7 @@ class PaymentController extends Controller
                 'data' => $payments->map(function ($payment) {
                     return [
                         'id' => $payment->id,
-                        'student_name' => $payment->student->firstnames . ' ' . $payment->student->surname,
+                        'student_name' => $payment->student->firstnames.' '.$payment->student->surname,
                         'student_email' => $payment->student->user->email ?? 'N/A',
                         'amount' => number_format($payment->amount, 2),
                         'final_amount' => number_format($payment->final_amount, 2),
@@ -101,7 +105,7 @@ class PaymentController extends Controller
                 'payment_date' => $payment->payment_date->format('Y-m-d'),
                 'created_at' => $payment->created_at->format('Y-m-d H:i'),
                 'student' => [
-                    'name' => $payment->student->firstnames . ' ' . $payment->student->surname,
+                    'name' => $payment->student->firstnames.' '.$payment->student->surname,
                     'email' => $payment->student->user->email ?? 'N/A',
                     'institution' => $payment->student->institution ? [
                         'name' => $payment->student->institution->name,
@@ -140,6 +144,11 @@ class PaymentController extends Controller
             return back()->with('error', 'Only pending payments can be approved.');
         }
 
+        $student = $payment->student;
+        $totalPaidBefore = Payment::where('student_id', $student->id)
+            ->where('status', PaymentStatus::APPROVED)
+            ->sum('final_amount');
+
         DB::beginTransaction();
         try {
             $payment->update([
@@ -150,8 +159,10 @@ class PaymentController extends Controller
 
             DB::commit();
 
+            $payment->load(['student.user', 'paymentMethod']);
+            event(new PaymentApproved($payment));
+
             // Notify user via SMS about approval
-            $student = $payment->student;
             $phone = optional($student->phones()->first())->phone;
             if ($phone) {
                 $appUrl = config('app.url');
@@ -159,16 +170,32 @@ class PaymentController extends Controller
                     $phone,
                     sprintf(
                         'Hi %s, your payment of %s for the NMCS conference has been APPROVED. Thank you! %s',
-                        trim($student->firstnames . ' ' . $student->surname),
+                        trim($student->firstnames.' '.$student->surname),
                         number_format($payment->final_amount, 2),
-                        $appUrl ? 'More details: ' . $appUrl : ''
+                        $appUrl ? 'More details: '.$appUrl : ''
                     )
                 );
+            }
+
+            $activeFee = ConferenceFee::getActiveFee();
+            if ($activeFee && (float) $activeFee->amount > 0) {
+                $totalPaidAfter = Payment::where('student_id', $student->id)
+                    ->where('status', PaymentStatus::APPROVED)
+                    ->sum('final_amount');
+                $required = (float) $activeFee->amount;
+                if ((float) $totalPaidAfter >= $required && (float) $totalPaidBefore < $required) {
+                    event(new ConferenceFeesFullyPaid(
+                        $student->load('user'),
+                        number_format((float) $totalPaidAfter, 2),
+                        number_format($required, 2),
+                    ));
+                }
             }
 
             return back()->with('success', 'Payment approved successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
+
             return back()->with('error', 'Failed to approve payment.');
         }
     }
@@ -196,6 +223,9 @@ class PaymentController extends Controller
 
             DB::commit();
 
+            $payment->load(['student.user', 'paymentMethod']);
+            event(new PaymentRejected($payment));
+
             // Notify user via SMS about rejection
             $student = $payment->student;
             $phone = optional($student->phones()->first())->phone;
@@ -205,10 +235,10 @@ class PaymentController extends Controller
                     $phone,
                     sprintf(
                         'Hi %s, your payment of %s for the NMCS conference has been REJECTED. Reason: %s %s',
-                        trim($student->firstnames . ' ' . $student->surname),
+                        trim($student->firstnames.' '.$student->surname),
                         number_format($payment->final_amount, 2),
                         $payment->rejection_reason,
-                        $appUrl ? 'More details: ' . $appUrl : ''
+                        $appUrl ? 'More details: '.$appUrl : ''
                     )
                 );
             }
@@ -216,6 +246,7 @@ class PaymentController extends Controller
             return back()->with('success', 'Payment rejected successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
+
             return back()->with('error', 'Failed to reject payment.');
         }
     }

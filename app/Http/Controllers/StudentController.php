@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\Gender;
 use App\Enums\PaymentStatus;
+use App\Events\StudentRegistered;
 use App\Models\ChronicCondition;
 use App\Models\ConferenceFee;
 use App\Models\Dietary;
@@ -117,14 +118,14 @@ class StudentController extends Controller
             ]);
 
             foreach ($validated['phones'] as $phone) {
-                if (!empty(trim($phone))) {
+                if (! empty(trim($phone))) {
                     $student->phones()->create(['phone' => trim($phone)]);
                 }
             }
 
-            if (!empty($validated['next_of_kins'])) {
+            if (! empty($validated['next_of_kins'])) {
                 foreach ($validated['next_of_kins'] as $nok) {
-                    if (!empty($nok['relationship']) || !empty($nok['fullname']) || !empty($nok['phone'])) {
+                    if (! empty($nok['relationship']) || ! empty($nok['fullname']) || ! empty($nok['phone'])) {
                         $student->nextOfKins()->create([
                             'relationship' => $nok['relationship'] ?? '',
                             'fullname' => $nok['fullname'] ?? '',
@@ -134,29 +135,32 @@ class StudentController extends Controller
                 }
             }
 
-            if (!empty($validated['disability_ids'])) {
+            if (! empty($validated['disability_ids'])) {
                 $student->disabilities()->attach($validated['disability_ids']);
             }
 
-            if (!empty($validated['dietary_ids'])) {
+            if (! empty($validated['dietary_ids'])) {
                 $student->dietaries()->attach($validated['dietary_ids']);
             }
 
-            if (!empty($validated['chronic_condition_ids'])) {
+            if (! empty($validated['chronic_condition_ids'])) {
                 $student->chronicConditions()->attach($validated['chronic_condition_ids']);
             }
 
             DB::commit();
 
+            event(new StudentRegistered($student->load('user')));
+
             return redirect('/dashboard')
                 ->with('success', 'Profile completed successfully!');
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('Failed to capture attendant: ' . $e->getMessage(), [
+            \Log::error('Failed to capture attendant: '.$e->getMessage(), [
                 'exception' => $e,
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
-            return back()->withErrors(['error' => 'Failed to capture attendant: ' . $e->getMessage()]);
+
+            return back()->withErrors(['error' => 'Failed to capture attendant: '.$e->getMessage()]);
         }
     }
 
@@ -182,7 +186,7 @@ class StudentController extends Controller
                 'gender' => $student->gender instanceof \BackedEnum ? $student->gender->value : $student->gender,
                 'address' => $student->address,
                 'nationalid' => $student->nationalid,
-                'phones' => $student->phones->map(fn($p) => $p->phone),
+                'phones' => $student->phones->map(fn ($p) => $p->phone),
                 'membership' => $student->membership ? [
                     'status' => $student->membership->status instanceof \BackedEnum ? $student->membership->status->value : $student->membership->status,
                     'description' => $student->membership->description,
@@ -240,14 +244,14 @@ class StudentController extends Controller
 
         $institutionLogoBase64 = null;
         if ($student->institution && $student->institution->logo) {
-            $instPath = public_path('storage/' . $student->institution->logo);
+            $instPath = public_path('storage/'.$student->institution->logo);
             if (file_exists($instPath)) {
                 $institutionLogoBase64 = base64_encode(file_get_contents($instPath));
             }
         }
 
         $pdf = Pdf::loadView('attendants.card-pdf', [
-            'fullName' => $student->firstnames . ' ' . $student->surname,
+            'fullName' => $student->firstnames.' '.$student->surname,
             'gender' => $student->gender instanceof \BackedEnum ? $student->gender->value : $student->gender,
             'nationalId' => $student->nationalid,
             'region' => $student->institution?->region?->name,
@@ -260,7 +264,7 @@ class StudentController extends Controller
             'institutionLogoBase64' => $institutionLogoBase64,
         ])->setPaper('a4', 'portrait');
 
-        $filename = 'attendant-card-' . $student->id . '.pdf';
+        $filename = 'attendant-card-'.$student->id.'.pdf';
 
         return $pdf->download($filename);
     }

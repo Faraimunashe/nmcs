@@ -156,9 +156,9 @@
                       Remember me
                     </label>
 
-                    <a href="#" class="text-sm font-semibold text-emerald-700 hover:text-emerald-800">
+                    <Link href="/forgot-password" class="text-sm font-semibold text-emerald-700 hover:text-emerald-800">
                       Forgot password?
-                    </a>
+                    </Link>
                   </div>
 
                   <button

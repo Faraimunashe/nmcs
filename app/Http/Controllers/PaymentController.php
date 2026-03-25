@@ -4,12 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Enums\PaymentPurpose;
 use App\Enums\PaymentStatus;
+use App\Events\PendingPaymentRecorded;
 use App\Models\ConferenceFee;
 use App\Models\Payment;
 use App\Models\PaymentMethod;
 use App\Models\PaymentRecipient;
 use App\Models\Student;
-use App\Models\User;
 use App\Services\TwilioSmsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -34,7 +34,7 @@ class PaymentController extends Controller
         }
 
         $method = $request->get('method');
-        if (!empty($method)) {
+        if (! empty($method)) {
             $query->where('payment_method_id', $method);
         }
 
@@ -49,15 +49,15 @@ class PaymentController extends Controller
         $payments = $query->latest('payment_date')->paginate(15);
 
         $student = Student::where('user_id', $user->id)->first();
-        
+
         $totalPaid = Payment::where('student_id', $student->id)
             ->where('status', PaymentStatus::APPROVED)
             ->sum('final_amount');
-        
+
         $totalPending = Payment::where('student_id', $student->id)
             ->where('status', PaymentStatus::PENDING)
             ->sum('final_amount');
-        
+
         $conferenceFee = ConferenceFee::getActiveFee();
         $conferenceFeeAmount = $conferenceFee ? $conferenceFee->amount : 0;
         $balance = $conferenceFeeAmount - $totalPaid;
@@ -154,8 +154,8 @@ class PaymentController extends Controller
     {
         $user = $request->user();
         $student = Student::where('user_id', $user->id)->first();
-        
-        if (!$student) {
+
+        if (! $student) {
             return redirect('/attendants/create');
         }
 
@@ -210,7 +210,7 @@ class PaymentController extends Controller
         DB::beginTransaction();
         try {
             $paymentRecipientId = null;
-            if (!empty($validated['payment_recipient_name'])) {
+            if (! empty($validated['payment_recipient_name'])) {
                 $paymentRecipient = PaymentRecipient::firstOrCreate(
                     ['name' => trim($validated['payment_recipient_name'])],
                     ['is_active' => true]
@@ -233,10 +233,13 @@ class PaymentController extends Controller
 
             DB::commit();
 
+            $payment->load(['student.user', 'paymentMethod', 'paymentRecipient']);
+            event(new PendingPaymentRecorded($payment));
+
             // Notify admins via SMS about pending payment
             $adminPhones = config('twilio.admin_phones', []);
-            if (!empty($adminPhones)) {
-                $studentName = trim($student->firstnames . ' ' . $student->surname);
+            if (! empty($adminPhones)) {
+                $studentName = trim($student->firstnames.' '.$student->surname);
                 $amount = number_format($payment->final_amount, 2);
                 $appUrl = config('app.url');
                 $message = sprintf(
@@ -244,7 +247,7 @@ class PaymentController extends Controller
                     $studentName,
                     $amount,
                     $payment->purpose instanceof \BackedEnum ? $payment->purpose->value : $payment->purpose,
-                    $appUrl ? 'More details: ' . $appUrl : ''
+                    $appUrl ? 'More details: '.$appUrl : ''
                 );
 
                 $sms = app(TwilioSmsService::class);
@@ -257,6 +260,7 @@ class PaymentController extends Controller
                 ->with('success', 'Payment recorded successfully. Awaiting approval.');
         } catch (\Exception $e) {
             DB::rollBack();
+
             return back()->withErrors(['error' => 'Failed to record payment. Please try again.']);
         }
     }
@@ -345,7 +349,7 @@ class PaymentController extends Controller
         DB::beginTransaction();
         try {
             $paymentRecipientId = null;
-            if (!empty($validated['payment_recipient_name'])) {
+            if (! empty($validated['payment_recipient_name'])) {
                 $paymentRecipient = PaymentRecipient::firstOrCreate(
                     ['name' => trim($validated['payment_recipient_name'])],
                     ['is_active' => true]
@@ -371,6 +375,7 @@ class PaymentController extends Controller
                 ->with('success', 'Payment updated successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
+
             return back()->withErrors(['error' => 'Failed to update payment. Please try again.']);
         }
     }
