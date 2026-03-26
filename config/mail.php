@@ -37,6 +37,25 @@ return [
 
     'mailers' => [
 
+        /*
+        | Mailtrap HTTP API (Symfony mailtrap+api / mailtrap+sandbox transports).
+        |
+        | Production (real delivery to recipients):
+        |   MAIL_MAILER=mailtrap
+        |   MAIL_MAILTRAP_DSN="mailtrap+api://YOUR_SENDING_API_TOKEN@default"
+        | Use an API token from Mailtrap → Email Sending → Sending Domains / API (live sending), not the Sandbox inbox token.
+        | Add and verify your domain in Mailtrap; set MAIL_FROM_ADDRESS to an address on that domain.
+        |
+        | Sandbox (testing only — captures mail in a Mailtrap inbox, no real delivery):
+        |   MAIL_MAILTRAP_DSN="mailtrap+sandbox://TOKEN@default?inboxId=1234567"
+        |
+        | URL-encode the token in the DSN if it contains reserved characters (@, +, etc.).
+        */
+        'mailtrap' => [
+            'transport' => 'mailtrap',
+            'dsn' => env('MAIL_MAILTRAP_DSN'),
+        ],
+
         'smtp' => [
             'transport' => 'smtp',
             'scheme' => env('MAIL_SCHEME'),
